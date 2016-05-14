@@ -7,6 +7,12 @@ x64/
 *.sdf
 *.user
 *.suo
+*.VC.db
+*.VC.opendb
+
+*.lib
+*.pdb
+*.idb
 
 # Xcode and OS X 
 build/
