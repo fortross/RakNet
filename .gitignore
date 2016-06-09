@@ -7,6 +7,12 @@ x64/
 *.sdf
 *.user
 *.suo
+*.VC.db
+*.VC.opendb
+
+*.lib
+*.pdb
+*.idb
 
 # Xcode and OS X 
 build/
@@ -29,3 +35,18 @@ Debug/
 Release/
 .DS_Store
 .Trashes
+
+# Ignore build caches and artifacts
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Lib/LibStatic/CMakeScripts/
+Lib/LibStatic/RakNetLibStatic.xcodeproj/
+Lib/LibStatic/cmake_install.cmake
+Lib/RakNetLibStatic/
+Lib/cmake_install.cmake
+RakNet.xcodeproj/
+cmake_install.cmake
+include/
+install_manifest.txt
+
