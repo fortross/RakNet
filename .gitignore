@@ -50,3 +50,4 @@ cmake_install.cmake
 include/
 install_manifest.txt
 
+*.exp

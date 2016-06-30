@@ -46,6 +46,9 @@ namespace RakNet
 /// Forward declarations
 struct RemoteClient;
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4239)
+#endif
 /// \internal
 /// \brief As the name says, a simple multithreaded TCP server.  Used by TelnetTransport
 class RAK_DLL_EXPORT TCPInterface

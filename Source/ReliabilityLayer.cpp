@@ -582,8 +582,8 @@ void ReliabilityLayer::FreeThreadSafeMemory( void )
 	outgoingPacketBuffer.Clear(true, _FILE_AND_LINE_);
 
 #ifdef _DEBUG
-	for (unsigned i = 0; i < delayList.Size(); i++ )
-		RakNet::OP_DELETE(delayList[ i ], __FILE__, __LINE__);
+	for (unsigned i_d = 0; i_d < delayList.Size(); i_d++ )
+		RakNet::OP_DELETE(delayList[ i_d ], __FILE__, __LINE__);
 	delayList.Clear(__FILE__, __LINE__);
 #endif
 
@@ -3236,7 +3236,7 @@ InternalPacket * ReliabilityLayer::BuildPacketFromSplitPacketList( SplitPacketCh
 
 
 //-------------------------------------------------------------------------------------------------------
-InternalPacket * ReliabilityLayer::BuildPacketFromSplitPacketList( SplitPacketIdType splitPacketId, CCTimeType time,
+InternalPacket * ReliabilityLayer::BuildPacketFromSplitPacketList( SplitPacketIdType splitPacketID, CCTimeType time,
 																  RakNetSocket2 *s, SystemAddress &systemAddress, RakNetRandom *rnr, 
 																  BitStream &updateBitStream)
 {
@@ -3246,7 +3246,7 @@ InternalPacket * ReliabilityLayer::BuildPacketFromSplitPacketList( SplitPacketId
 	InternalPacket * internalPacket;
 
 	// Find in splitPacketChannelList the SplitPacketChannel with this splitPacketId
-	i=splitPacketChannelList.GetIndexFromKey(splitPacketId, &objectExists);
+	i=splitPacketChannelList.GetIndexFromKey(splitPacketID, &objectExists);
 	splitPacketChannel=splitPacketChannelList[i];
 	
 #if PREALLOCATE_LARGE_MESSAGES==1

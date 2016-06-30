@@ -32,6 +32,10 @@
 #include "LocklessTypes.h"
 #include "DS_ThreadsafeAllocatingQueue.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4239)
+#endif
+
 namespace RakNet
 {
 

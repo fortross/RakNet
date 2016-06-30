@@ -368,9 +368,9 @@ bool TM_TeamMember::LeaveTeam(TM_Team* team, NoTeamId _noTeamSubcategory)
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-bool TM_TeamMember::LeaveAllTeams(NoTeamId noTeamSubcategory)
+bool TM_TeamMember::LeaveAllTeams(NoTeamId noTeamSubcat)
 {
-	return RequestTeam(TeamSelection::NoTeam(noTeamSubcategory));
+	return RequestTeam(TeamSelection::NoTeam(noTeamSubcat));
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -481,10 +481,10 @@ bool TM_TeamMember::DeserializeConstruction(TeamManager *teamManager, BitStream 
 
 	WorldId worldId;
 	constructionBitstream->Read(worldId);
-	TM_World *world = teamManager->GetWorldWithId(worldId);
-	RakAssert(world);
+	TM_World *local_world = teamManager->GetWorldWithId(worldId);
+	RakAssert(local_world);
 	constructionBitstream->Read(networkId);
-	world->ReferenceTeamMember(this,networkId);
+	local_world->ReferenceTeamMember(this,networkId);
 
 	success=constructionBitstream->Read(teamsRequestedSize);
 	for (unsigned int i=0; i < teamsRequestedSize; i++)
@@ -500,7 +500,7 @@ bool TM_TeamMember::DeserializeConstruction(TeamManager *teamManager, BitStream 
 		if (hasTeamToLeave)
 		{
 			constructionBitstream->Read(teamToLeaveId);
-			rt.teamToLeave = world->GetTeamByNetworkID(teamToLeaveId);
+			rt.teamToLeave = local_world->GetTeamByNetworkID(teamToLeaveId);
 			RakAssert(rt.teamToLeave);
 		}
 		else
@@ -511,11 +511,11 @@ bool TM_TeamMember::DeserializeConstruction(TeamManager *teamManager, BitStream 
 		if (hasTeamRequested)
 		{
 			success=constructionBitstream->Read(teamRequestedId);
-			rt.requested = world->GetTeamByNetworkID(teamRequestedId);
+			rt.requested = local_world->GetTeamByNetworkID(teamRequestedId);
 			RakAssert(rt.requested);
 		}
 		rt.whenRequested=RakNet::GetTime();
-		rt.requestIndex=world->teamRequestIndex++; // In case whenRequested is the same between two teams when sorting team requests
+		rt.requestIndex=local_world->teamRequestIndex++; // In case whenRequested is the same between two teams when sorting team requests
 		if (
 			(hasTeamToLeave==false || (hasTeamToLeave==true && rt.teamToLeave!=0)) &&
 			(hasTeamRequested==false || (hasTeamRequested==true && rt.requested!=0))
@@ -527,7 +527,7 @@ bool TM_TeamMember::DeserializeConstruction(TeamManager *teamManager, BitStream 
 
 
 	if (success)
-		world->teamManager->ProcessTeamAssigned(constructionBitstream);
+		local_world->teamManager->ProcessTeamAssigned(constructionBitstream);
 	return success;
 }
 
@@ -979,8 +979,8 @@ bool TM_Team::DeserializeConstruction(TeamManager *teamManager, BitStream *const
 {
 	WorldId worldId;
 	constructionBitstream->Read(worldId);
-	TM_World *world = teamManager->GetWorldWithId(worldId);
-	RakAssert(world);
+	TM_World *local_world = teamManager->GetWorldWithId(worldId);
+	RakAssert(local_world);
 	constructionBitstream->Read(ID);
 	constructionBitstream->Read(joinPermissions);
 	constructionBitstream->Read(balancingApplies);
@@ -988,7 +988,7 @@ bool TM_Team::DeserializeConstruction(TeamManager *teamManager, BitStream *const
 	RakAssert(b);
 	if (b)
 	{
-		world->ReferenceTeam(this,ID,balancingApplies);
+		local_world->ReferenceTeam(this,ID,balancingApplies);
 	}
 	return b;
 }
@@ -1164,14 +1164,14 @@ void TM_World::DereferenceTeam(TM_Team *team, NoTeamId noTeamSubcategory)
 	{
 		if (teams[i]==team)
 		{
-			TM_Team *team = teams[i];
-			while (team->teamMembers.Size())
+			TM_Team *local_team = teams[i];
+			while (local_team->teamMembers.Size())
 			{
-				team->teamMembers[team->teamMembers.Size()-1]->LeaveTeam(team, noTeamSubcategory);
+				local_team->teamMembers[local_team->teamMembers.Size()-1]->LeaveTeam(local_team, noTeamSubcategory);
 			}
 			teams.RemoveAtIndex(i);
 
-			teamsHash.Remove(team->GetNetworkID(),_FILE_AND_LINE_);
+			teamsHash.Remove(local_team->GetNetworkID(),_FILE_AND_LINE_);
 
 			break;
 		}

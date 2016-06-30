@@ -607,8 +607,7 @@ void CloudServer::OnGetRequest(Packet *packet)
 			remoteCloudClient = remoteSystems.ItemAtIndex(remoteSystemsHashIndex);
 		}
 
-		unsigned int keyIndex;
-		for (keyIndex=0; keyIndex < getRequest->cloudQueryWithAddresses.cloudQuery.keys.Size(); keyIndex++)
+		for (unsigned int keyIndex=0; keyIndex < getRequest->cloudQueryWithAddresses.cloudQuery.keys.Size(); keyIndex++)
 		{
 			cloudKey = getRequest->cloudQueryWithAddresses.cloudQuery.keys[keyIndex];
 
@@ -648,10 +647,9 @@ void CloudServer::OnGetRequest(Packet *packet)
 				CloudData *cloudData;
 				bool keyDataListExists;
 
-				unsigned int specificSystemIndex;
-				for (specificSystemIndex=0; specificSystemIndex < getRequest->cloudQueryWithAddresses.specificSystems.Size(); specificSystemIndex++)
+				for (unsigned int specSystemIndex=0; specSystemIndex < getRequest->cloudQueryWithAddresses.specificSystems.Size(); specSystemIndex++)
 				{
-					RakNetGUID specificSystem = getRequest->cloudQueryWithAddresses.specificSystems[specificSystemIndex];
+					RakNetGUID specificSystem = getRequest->cloudQueryWithAddresses.specificSystems[specSystemIndex];
 
 					unsigned int keyDataListIndex = cloudDataList->keyData.GetIndexFromKey(specificSystem, &keyDataListExists);
 					if (keyDataListExists==false)
@@ -687,13 +685,12 @@ void CloudServer::OnGetRequest(Packet *packet)
 				subscribedKeysIndex = remoteCloudClient->subscribedKeys.GetIndexFromKey(cloudDataList->key, &subscribedKeysIndexExists);
 				if (subscribedKeysIndexExists)
 				{
-					KeySubscriberID* keySubscriberId;
-					keySubscriberId = remoteCloudClient->subscribedKeys[subscribedKeysIndex];
-					unsigned int specificSystemIndex;
-					for (specificSystemIndex=0; specificSystemIndex < keySubscriberId->specificSystemsSubscribedTo.Size(); specificSystemIndex++)
+					KeySubscriberID* keySubscrId;
+					keySubscrId = remoteCloudClient->subscribedKeys[subscribedKeysIndex];
+					for (unsigned int specSystemIndex=0; specSystemIndex < keySubscrId->specificSystemsSubscribedTo.Size(); specSystemIndex++)
 					{
 						bool keyDataExists;
-						unsigned int keyDataIndex = cloudDataList->keyData.GetIndexFromKey(keySubscriberId->specificSystemsSubscribedTo[specificSystemIndex], &keyDataExists);
+						unsigned int keyDataIndex = cloudDataList->keyData.GetIndexFromKey(keySubscrId->specificSystemsSubscribedTo[specSystemIndex], &keyDataExists);
 						if (keyDataExists)
 						{
 							CloudData *keyData = cloudDataList->keyData[keyDataIndex];
@@ -760,7 +757,7 @@ void CloudServer::OnUnsubscribeRequest(Packet *packet)
 
 	for (index=0; index < keyCount; index++)
 	{
-		CloudKey cloudKey = cloudKeys[index];
+		cloudKey = cloudKeys[index];
 
 	//	dataRepositoryIndex = 
 			dataRepository.GetIndexFromKey(cloudKey, &dataRepositoryExists);

@@ -122,9 +122,8 @@ Packet* TelnetTransport::Receive( void )
 	*/
 
 	// Get this guy's cursor buffer.  This is real bullcrap that I have to do this.
-	unsigned i;
 	TelnetClient *remoteClient=0;
-	for (i=0; i < remoteClients.Size(); i++)
+	for (unsigned i=0; i < remoteClients.Size(); i++)
 	{
 		if (remoteClients[i]->systemAddress==p->systemAddress)
 			remoteClient=remoteClients[i];
@@ -183,7 +182,7 @@ Packet* TelnetTransport::Receive( void )
 
 	bool gotLine;
 	// Process each character in turn
-	for (i=0; i < p->length; i++)
+	for (unsigned i=0; i < p->length; i++)
 	{
 
 #ifdef ECHO_INPUT

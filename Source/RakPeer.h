@@ -37,6 +37,10 @@
 #include "LocklessTypes.h"
 #include "DS_Queue.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable : 4239)
+#endif
+
 namespace RakNet {
 /// Forward declarations
 class HuffmanEncodingTree;

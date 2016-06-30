@@ -284,7 +284,7 @@ bool UDPProxyClient::PingServerGroup::AreAllServersPinged(void) const
 	return true;
 }
 
-void UDPProxyClient::PingServerGroup::SendPingedServersToCoordinator(RakPeerInterface *rakPeerInterface)
+void UDPProxyClient::PingServerGroup::SendPingedServersToCoordinator(RakPeerInterface *rakPeerIface)
 {
 	BitStream outgoingBs;
 	outgoingBs.Write((MessageID)ID_UDP_PROXY_GENERAL);
@@ -299,7 +299,7 @@ void UDPProxyClient::PingServerGroup::SendPingedServersToCoordinator(RakPeerInte
 		outgoingBs.Write(serversToPing[serversToPingIndex].serverAddress);
 		outgoingBs.Write(serversToPing[serversToPingIndex].ping);
 	}
-	rakPeerInterface->Send(&outgoingBs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, coordinatorAddressForPings, false);
+	rakPeerIface->Send(&outgoingBs, MEDIUM_PRIORITY, RELIABLE_ORDERED, 0, coordinatorAddressForPings, false);
 }
 void UDPProxyClient::Clear(void)
 {

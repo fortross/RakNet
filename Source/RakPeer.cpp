@@ -429,9 +429,8 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
 	DerefAllSockets();
 
 
-	int i;
 	// Go through all socket descriptors and precreate sockets on the specified addresses
-	for (i=0; i<socketDescriptorCount; i++)
+	for (unsigned int i=0; i<socketDescriptorCount; i++)
 	{
 		/*
 		const char *addrToBind;
@@ -579,7 +578,7 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
 	}
 
 #if !defined(__native_client__) && !defined(WINDOWS_STORE_RT)
-	for (i=0; i<socketDescriptorCount; i++)
+	for (unsigned int i=0; i<socketDescriptorCount; i++)
 	{
 		if (socketList[i]->IsBerkleySocket())
 			((RNS2_Berkley*) socketList[i])->CreateRecvPollingThread(threadPriority);
@@ -587,7 +586,7 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
 #endif
 
 // #if !defined(_XBOX) && !defined(_XBOX_720_COMPILE_AS_WINDOWS) && !defined(X360)
-	for (i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
+	for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
 	{
 		if (ipList[i]==UNASSIGNED_SYSTEM_ADDRESS)
 			break;
@@ -624,7 +623,7 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
 
 		activeSystemList = RakNet::OP_NEW_ARRAY<RemoteSystemStruct*>(maximumNumberOfPeers, _FILE_AND_LINE_ );
 
-		for ( i = 0; i < maximumNumberOfPeers; i++ )
+		for ( unsigned int i = 0; i < maximumNumberOfPeers; i++ )
 		//for ( i = 0; i < remoteSystemListSize; i++ )
 		{
 			// remoteSystemList in Single thread
@@ -730,12 +729,12 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
 #endif // RAKPEER_USER_THREADED!=1
 	}
 
-	for (i=0; i < pluginListTS.Size(); i++)
+	for (unsigned i=0; i < pluginListTS.Size(); i++)
 	{
 		pluginListTS[i]->OnRakPeerStartup();
 	}
 
-	for (i=0; i < pluginListNTS.Size(); i++)
+	for (unsigned int i=0; i < pluginListNTS.Size(); i++)
 	{
 		pluginListNTS[i]->OnRakPeerStartup();
 	}
@@ -4568,14 +4567,12 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 	(void) timeRead;
 	RakPeer::RemoteSystemStruct *remoteSystem;
 	RakNet::Packet *packet;
-	unsigned i;
-
 
 	char str1[64];
 	systemAddress.ToString(false, str1);
 	if (rakPeer->IsBanned( str1 ))
 	{
-		for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+		for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 			rakPeer->pluginListNTS[i]->OnDirectSocketReceive(data, length*8, systemAddress);
 
 		RakNet::BitStream bs;
@@ -4588,7 +4585,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 		bsp.data = (char*) bs.GetData();
 		bsp.length = bs.GetNumberOfBytesUsed();
 		bsp.systemAddress = systemAddress;
-		for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+		for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 			rakPeer->pluginListNTS[i]->OnDirectSocketSend((char*) bs.GetData(), bs.GetNumberOfBitsUsed(), systemAddress);
 		rakNetSocket->Send(&bsp, _FILE_AND_LINE_);
 
@@ -4654,7 +4651,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 
 	if (*isOfflineMessage)
 	{
-		for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+		for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 			rakPeer->pluginListNTS[i]->OnDirectSocketReceive(data, length*8, systemAddress);
 
 		// These are all messages from unconnected systems.  Messages here can be any size, but are never processed from connected systems.
@@ -4683,8 +4680,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 				outBitStream.Write( (char*)rakPeer->offlinePingResponse.GetData(), rakPeer->offlinePingResponse.GetNumberOfBytesUsed() );
 				rakPeer->rakPeerMutexes[ RakPeer::offlinePingResponse_Mutex ].Unlock();
 
-				unsigned i;
-				for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+				for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 					rakPeer->pluginListNTS[i]->OnDirectSocketSend((const char*)outBitStream.GetData(), outBitStream.GetNumberOfBytesUsed(), systemAddress);
 
 				RNS2_SendParameters bsp;
@@ -4762,7 +4758,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 		}
 		else if ((unsigned char)(data)[0] == (MessageID)ID_OPEN_CONNECTION_REPLY_1)
 		{
-			for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+			for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 				rakPeer->pluginListNTS[i]->OnDirectSocketReceive(data, length*8, systemAddress);
 
 			RakNet::BitStream bsIn((unsigned char*) data,length,false);
@@ -4786,9 +4782,8 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 			if (serverHasSecurity)
 				bsOut.Write(cookie);
 
-			unsigned i;
 			rakPeer->requestedConnectionQueueMutex.Lock();
-			for (i=0; i <  rakPeer->requestedConnectionQueue.Size(); i++)
+			for (unsigned int i=0; i <  rakPeer->requestedConnectionQueue.Size(); i++)
 			{
 				RakPeer::RequestedConnectionStruct *rcs;
 				rcs=rakPeer->requestedConnectionQueue[i];
@@ -4878,8 +4873,8 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 					// Our guid
 					bsOut.Write(rakPeer->GetGuidFromSystemAddress(UNASSIGNED_SYSTEM_ADDRESS));
 
-					for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
-						rakPeer->pluginListNTS[i]->OnDirectSocketSend((const char*) bsOut.GetData(), bsOut.GetNumberOfBitsUsed(), rcs->systemAddress);
+					for (unsigned j=0; j < rakPeer->pluginListNTS.Size(); j++)
+						rakPeer->pluginListNTS[j]->OnDirectSocketSend((const char*) bsOut.GetData(), bsOut.GetNumberOfBitsUsed(), rcs->systemAddress);
 
 					// SocketLayer::SendTo( rakPeer->socketList[rcs->socketIndex], (const char*) bsOut.GetData(), bsOut.GetNumberOfBytesUsed(), rcs->systemAddress, _FILE_AND_LINE_ );
 
@@ -4896,7 +4891,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 		}
 		else if ((unsigned char)(data)[0] == (MessageID)ID_OPEN_CONNECTION_REPLY_2)
 		{
-			for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+			for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 				rakPeer->pluginListNTS[i]->OnDirectSocketReceive(data, length*8, systemAddress);
 
 			RakNet::BitStream bs((unsigned char*) data,length,false);
@@ -5206,7 +5201,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 				bsOut.Write((unsigned char) 0);  // HasCookie oN
 
 			// MTU. Lower MTU if it exceeds our own limit.
-			uint16_t mtu = (length+UDP_HEADER_SIZE > MAXIMUM_MTU_SIZE) ? MAXIMUM_MTU_SIZE : length+UDP_HEADER_SIZE;
+			uint16_t mtu = static_cast<uint16_t>((length+UDP_HEADER_SIZE > MAXIMUM_MTU_SIZE) ? MAXIMUM_MTU_SIZE : length+UDP_HEADER_SIZE);
 			bsOut.WriteCasted<uint16_t>(mtu);
 			// Pad response with zeros to MTU size so the connection's MTU will be tested in both directions
 			bsOut.PadWithZeroToByteLength(mtu - bsOut.GetNumberOfBytesUsed());
@@ -5368,7 +5363,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 				bsOut.Write((MessageID)ID_ALREADY_CONNECTED);
 				bsOut.WriteAlignedBytes((const unsigned char*) OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
 				bsOut.Write(rakPeer->myGuid);
-				for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+				for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 					rakPeer->pluginListNTS[i]->OnDirectSocketSend((const char*) bsOut.GetData(), bsOut.GetNumberOfBitsUsed(), systemAddress);
 				// SocketLayer::SendTo( rakNetSocket, (const char*) bsOut.GetData(), bsOut.GetNumberOfBytesUsed(), systemAddress, _FILE_AND_LINE_ );
 				RNS2_SendParameters bsp;
@@ -5385,7 +5380,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 				bsOut.Write((MessageID)ID_NO_FREE_INCOMING_CONNECTIONS);
 				bsOut.WriteAlignedBytes((const unsigned char*) OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
 				bsOut.Write(rakPeer->myGuid);
-				for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+				for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 					rakPeer->pluginListNTS[i]->OnDirectSocketSend((const char*) bsOut.GetData(), bsOut.GetNumberOfBitsUsed(), systemAddress);
 				//SocketLayer::SendTo( rakNetSocket, (const char*) bsOut.GetData(), bsOut.GetNumberOfBytesUsed(), systemAddress, _FILE_AND_LINE_ );
 				RNS2_SendParameters bsp;
@@ -5405,7 +5400,7 @@ bool ProcessOfflineNetworkPacket( SystemAddress systemAddress, const char *data,
 				bsOut.Write((MessageID)ID_IP_RECENTLY_CONNECTED);
 				bsOut.WriteAlignedBytes((const unsigned char*) OFFLINE_MESSAGE_DATA_ID, sizeof(OFFLINE_MESSAGE_DATA_ID));
 				bsOut.Write(rakPeer->myGuid);
-				for (i=0; i < rakPeer->pluginListNTS.Size(); i++)
+				for (unsigned int i=0; i < rakPeer->pluginListNTS.Size(); i++)
 					rakPeer->pluginListNTS[i]->OnDirectSocketSend((const char*) bsOut.GetData(), bsOut.GetNumberOfBitsUsed(), systemAddress);
 				//SocketLayer::SendTo( rakNetSocket, (const char*) bsOut.GetData(), bsOut.GetNumberOfBytesUsed(), systemAddress, _FILE_AND_LINE_ );
 

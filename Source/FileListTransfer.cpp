@@ -228,9 +228,9 @@ void FileListTransfer::Send(FileList *fileList, RakNet::RakPeerInterface *rakPee
 			FileToPushRecipient *ftpr;
 
 			fileToPushRecipientListMutex.Lock();
-			for (unsigned int i=0; i < fileToPushRecipientList.Size(); i++)
+			for (unsigned int k=0; k < fileToPushRecipientList.Size(); k++)
 			{
-				if (fileToPushRecipientList[i]->systemAddress==recipient && fileToPushRecipientList[i]->setId==setId)
+				if (fileToPushRecipientList[k]->systemAddress==recipient && fileToPushRecipientList[k]->setId==setId)
 				{
 // 					ftpr=fileToPushRecipientList[i];
 // 					ftpr->AddRef();
@@ -532,8 +532,7 @@ void FileListTransfer::OnRakPeerShutdown(void)
 }
 void FileListTransfer::Clear(void)
 {
-	unsigned i;
-	for (i=0; i < fileListReceivers.Size(); i++)
+	for (unsigned int i=0; i < fileListReceivers.Size(); i++)
 	{
 		fileListReceivers[i]->downloadHandler->OnDereference();
 		if (fileListReceivers[i]->deleteDownloadHandler)
@@ -561,21 +560,21 @@ void FileListTransfer::OnClosedConnection(const SystemAddress &systemAddress, Ra
 
 	RemoveReceiver(systemAddress);
 }
-void FileListTransfer::CancelReceive(unsigned short setId)
+void FileListTransfer::CancelReceive(unsigned short sId)
 {
-	if (fileListReceivers.Has(setId)==false)
+	if (fileListReceivers.Has(sId)==false)
 	{
 #ifdef _DEBUG
 		RakAssert(0);
 #endif
 		return;
 	}
-	FileListReceiver *fileListReceiver=fileListReceivers.Get(setId);
+	FileListReceiver *fileListReceiver=fileListReceivers.Get(sId);
 	fileListReceiver->downloadHandler->OnDereference();
 	if (fileListReceiver->deleteDownloadHandler)
 		RakNet::OP_DELETE(fileListReceiver->downloadHandler, _FILE_AND_LINE_);
 	RakNet::OP_DELETE(fileListReceiver, _FILE_AND_LINE_);
-	fileListReceivers.Delete(setId);
+	fileListReceivers.Delete(sId);
 }
 void FileListTransfer::RemoveReceiver(SystemAddress systemAddress)
 {
@@ -631,9 +630,9 @@ void FileListTransfer::RemoveReceiver(SystemAddress systemAddress)
 	}
 	fileToPushRecipientListMutex.Unlock();
 }
-bool FileListTransfer::IsHandlerActive(unsigned short setId)
+bool FileListTransfer::IsHandlerActive(unsigned short sId)
 {
-	return fileListReceivers.Has(setId);
+	return fileListReceivers.Has(sId);
 }
 void FileListTransfer::AddCallback(FileListProgress *cb)
 {
@@ -1100,12 +1099,12 @@ int SendIRIToAddressCB(FileListTransfer::ThreadData threadData, bool *returnOutp
 	return 0;
 }
 }
-void FileListTransfer::SendIRIToAddress(SystemAddress systemAddress, unsigned short setId)
+void FileListTransfer::SendIRIToAddress(SystemAddress systemAddress, unsigned short sId)
 {
 	ThreadData threadData;
 	threadData.fileListTransfer=this;
 	threadData.systemAddress=systemAddress;
-	threadData.setId=setId;
+	threadData.setId=sId;
 
 	if (threadPool.WasStarted())
 	{
@@ -1121,9 +1120,9 @@ void FileListTransfer::OnReferencePushAck(Packet *packet)
 {
 	RakNet::BitStream inBitStream(packet->data, packet->length, false);
 	inBitStream.IgnoreBits(8);
-	unsigned short setId;
-	inBitStream.Read(setId);
-	SendIRIToAddress(packet->systemAddress, setId);
+	unsigned short sId;
+	inBitStream.Read(sId);
+	SendIRIToAddress(packet->systemAddress, sId);
 }
 void FileListTransfer::RemoveFromList(FileToPushRecipient *ftpr)
 {

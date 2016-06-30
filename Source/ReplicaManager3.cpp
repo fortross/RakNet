@@ -725,7 +725,7 @@ void Connection_RM3::AutoConstructByQuery(ReplicaManager3 *replicaManager3, Worl
 {
 	ValidateLists(replicaManager3);
 
-	ConstructionMode constructionMode = QueryConstructionMode();
+	ConstructionMode localConstructionMode = QueryConstructionMode();
 
 	unsigned int index;
 	RM3ConstructionState constructionState;
@@ -735,7 +735,7 @@ void Connection_RM3::AutoConstructByQuery(ReplicaManager3 *replicaManager3, Worl
 	constructedReplicasCulled.Clear(false,_FILE_AND_LINE_);
 	destroyedReplicasCulled.Clear(false,_FILE_AND_LINE_);
 
-	if (constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
+	if (localConstructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || localConstructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
 	{
 		while (index < queryToConstructReplicaList.Size())
 		{
@@ -812,7 +812,7 @@ void Connection_RM3::AutoConstructByQuery(ReplicaManager3 *replicaManager3, Worl
 			}
 		}
 
-		if (constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
+		if (localConstructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
 		{
 			RM3DestructionState destructionState;
 			index=0;
@@ -837,7 +837,7 @@ void Connection_RM3::AutoConstructByQuery(ReplicaManager3 *replicaManager3, Worl
 			}
 		}
 	}
-	else if (constructionMode==QUERY_CONNECTION_FOR_REPLICA_LIST)
+	else if (localConstructionMode==QUERY_CONNECTION_FOR_REPLICA_LIST)
 	{
 		QueryReplicaList(constructedReplicasCulled,destroyedReplicasCulled);
 
@@ -874,7 +874,7 @@ void Connection_RM3::AutoConstructByQuery(ReplicaManager3 *replicaManager3, Worl
 }
 void ReplicaManager3::Update(void)
 {
-	unsigned int index,index2,index3;
+	unsigned int index2, index3;
 
 	WorldId worldId;
 	RM3World *world;
@@ -885,7 +885,7 @@ void ReplicaManager3::Update(void)
 		world = worldsList[index3];
 		worldId = world->worldId;
 
-		for (index=0; index < world->connectionList.Size(); index++)
+		for (unsigned int index=0; index < world->connectionList.Size(); index++)
 		{
 			if (world->connectionList[index]->isValidated==false)
 				continue;
@@ -900,13 +900,12 @@ void ReplicaManager3::Update(void)
 			world = worldsList[index3];
 			worldId = world->worldId;
 
-			for (index=0; index < world->userReplicaList.Size(); index++)
+			for (unsigned int index=0; index < world->userReplicaList.Size(); index++)
 			{
 				world->userReplicaList[index]->forceSendUntilNextUpdate=false;
 				world->userReplicaList[index]->OnUserReplicaPreSerializeTick();
 			}
 
-			unsigned int index;
 			SerializeParameters sp;
 			sp.curTime=time;
 			Connection_RM3 *connection;
@@ -917,7 +916,7 @@ void ReplicaManager3::Update(void)
 			for (int i=0; i < RM3_NUM_OUTPUT_BITSTREAM_CHANNELS; i++)
 				sp.pro[i]=defaultSendParameters;
 			index2=0;
-			for (index=0; index < world->connectionList.Size(); index++)
+			for (unsigned int index=0; index < world->connectionList.Size(); index++)
 			{
 				connection = world->connectionList[index];
 				sp.bitsWrittenSoFar=0;
@@ -1769,11 +1768,11 @@ SendSerializeIfChangedResult Connection_RM3::SendSerializeIfChanged(LastSerializ
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Connection_RM3::OnLocalReference(Replica3* replica3, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	RakAssert(constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
+	ConstructionMode constMode = QueryConstructionMode();
+	RakAssert(constMode==QUERY_REPLICA_FOR_CONSTRUCTION || constMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
 	RakAssert(replica3);
 	(void) replicaManager;
-	(void) constructionMode;
+	(void) constMode;
 
 #ifdef _DEBUG
 	for (unsigned int i=0; i < queryToConstructReplicaList.Size(); i++)
@@ -1863,8 +1862,8 @@ void Connection_RM3::OnDownloadFromThisSystem(Replica3* replica3, ReplicaManager
 	LastSerializationResult* lsr=RakNet::OP_NEW<LastSerializationResult>(_FILE_AND_LINE_);
 	lsr->replica=replica3;
 
-	ConstructionMode constructionMode = QueryConstructionMode();
-	if (constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
+	ConstructionMode constMode = QueryConstructionMode();
+	if (constMode==QUERY_REPLICA_FOR_CONSTRUCTION || constMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
 	{
 		unsigned int j;
 		for (j=0; j < queryToConstructReplicaList.Size(); j++)
@@ -1892,8 +1891,8 @@ void Connection_RM3::OnDownloadFromThisSystem(Replica3* replica3, ReplicaManager
 
 void Connection_RM3::OnDownloadFromOtherSystem(Replica3* replica3, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	if (constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
+	ConstructionMode constrMode = QueryConstructionMode();
+	if (constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
 	{
 		unsigned int j;
 		for (j=0; j < queryToConstructReplicaList.Size(); j++)
@@ -1912,9 +1911,9 @@ void Connection_RM3::OnDownloadFromOtherSystem(Replica3* replica3, ReplicaManage
 
 void Connection_RM3::OnNeverConstruct(unsigned int queryToConstructIdx, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	RakAssert(constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
-	(void) constructionMode;
+	ConstructionMode constrMode = QueryConstructionMode();
+	RakAssert(constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
+	(void) constrMode;
 
 	ValidateLists(replicaManager);
 	LastSerializationResult* lsr = queryToConstructReplicaList[queryToConstructIdx];
@@ -1927,9 +1926,9 @@ void Connection_RM3::OnNeverConstruct(unsigned int queryToConstructIdx, ReplicaM
 
 void Connection_RM3::OnConstructToThisConnection(unsigned int queryToConstructIdx, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	RakAssert(constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
-	(void) constructionMode;
+	ConstructionMode constrMode = QueryConstructionMode();
+	RakAssert(constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
+	(void) constrMode;
 
 	ValidateLists(replicaManager);
 	LastSerializationResult* lsr = queryToConstructReplicaList[queryToConstructIdx];
@@ -1980,9 +1979,9 @@ void Connection_RM3::OnNeverSerialize(LastSerializationResult *lsr, ReplicaManag
 
 void Connection_RM3::OnReplicaAlreadyExists(unsigned int queryToConstructIdx, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	RakAssert(constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
-	(void) constructionMode;
+	ConstructionMode constrMode = QueryConstructionMode();
+	RakAssert(constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
+	(void) constrMode;
 
 	ValidateLists(replicaManager);
 	LastSerializationResult* lsr = queryToConstructReplicaList[queryToConstructIdx];
@@ -2002,8 +2001,8 @@ void Connection_RM3::OnDownloadExisting(Replica3* replica3, ReplicaManager3 *rep
 {
 	ValidateLists(replicaManager);
 
-	ConstructionMode constructionMode = QueryConstructionMode();
-	if (constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
+	ConstructionMode constrMode = QueryConstructionMode();
+	if (constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION)
 	{
 		unsigned int idx;
 		for (idx=0; idx < queryToConstructReplicaList.Size(); idx++)
@@ -2024,9 +2023,9 @@ void Connection_RM3::OnDownloadExisting(Replica3* replica3, ReplicaManager3 *rep
 
 void Connection_RM3::OnSendDestructionFromQuery(unsigned int queryToDestructIdx, ReplicaManager3 *replicaManager)
 {
-	ConstructionMode constructionMode = QueryConstructionMode();
-	RakAssert(constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION || constructionMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
-	(void) constructionMode;
+	ConstructionMode constrMode = QueryConstructionMode();
+	RakAssert(constrMode==QUERY_REPLICA_FOR_CONSTRUCTION || constrMode==QUERY_REPLICA_FOR_CONSTRUCTION_AND_DESTRUCTION);
+	(void) constrMode;
 
 	ValidateLists(replicaManager);
 	LastSerializationResult* lsr = queryToDestructReplicaList[queryToDestructIdx];

@@ -145,27 +145,27 @@ void DynDNS::Update(void)
 		{
 			unsigned int i;
 
-			char *result;
-			result=strstr((char*) packet->data, "Connection: close");
-			if (result!=0)
+			char *localResult;
+			localResult=strstr((char*) packet->data, "Connection: close");
+			if (localResult!=0)
 			{
-				result+=strlen("Connection: close");
-				while (*result && ((*result=='\r') || (*result=='\n') || (*result==' ')) )
-					result++;
+				localResult+=strlen("Connection: close");
+				while (*localResult && ((*localResult=='\r') || (*localResult=='\n') || (*localResult==' ')) )
+					localResult++;
 				for (i=0; i < 13; i++)
 				{
-					if (strncmp(resultTable[i].code, result, strlen(resultTable[i].code))==0)
+					if (strncmp(resultTable[i].code, localResult, strlen(resultTable[i].code))==0)
 					{
 						if (resultTable[i].resultCode==RC_SUCCESS)
 						{
 							// Read my external IP into myIPStr
 							// Advance until we hit a number
-							while (*result && ((*result<'0') || (*result>'9')) )
-								result++;
-							if (*result)
+							while (*localResult && ((*localResult<'0') || (*localResult>'9')) )
+								localResult++;
+							if (*localResult)
 							{
 								SystemAddress parser;
-								parser.FromString(result);
+								parser.FromString(localResult);
 								parser.ToString(false, myIPStr);
 							}
 						}
@@ -206,13 +206,13 @@ void DynDNS::Update(void)
 			Connection to host lost.
 			*/
 
-			char *result;
-			result=strstr((char*) packet->data, "Current IP Address: ");
-			if (result!=0)
+			char *localResult;
+			localResult=strstr((char*) packet->data, "Current IP Address: ");
+			if (localResult!=0)
 			{
-				result+=strlen("Current IP Address: ");
+				localResult+=strlen("Current IP Address: ");
 				SystemAddress myIp;
-				myIp.FromString(result);
+				myIp.FromString(localResult);
 				myIp.ToString(false, myIPStr);
 
 				char existingHost[65];
